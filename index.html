@@ -169,7 +169,7 @@ details p{color:#5d635f;margin:10px 0 0}
  <div class="eyebrow rv">02 — Pair with any meme</div>
  <h2 class="rv">Pick the meme your coin trades against.</h2>
  <p class="sub rv">pump.fun now lets a new coin be quoted in any pump.fun coin instead of SOL. Search one, or take one of the big ones. pumpex checks live whether pump.fun will accept it as a pair.</p>
- <div class="searchbar rv"><input id="q" placeholder="Search a pump.fun meme by name, ticker or address" autocomplete="off"><button class="btn ghost" id="solbtn">Use SOL</button></div>
+ <div class="searchbar rv"><input id="q" placeholder="Search a pump.fun meme by name or ticker" autocomplete="off"><button class="btn ghost" id="solbtn">Use SOL</button></div>
  <div class="memehead rv"><span>Trending pump.fun memes over $1M</span><span id="memecount">loading…</span></div>
  <div class="memes" id="memes"><div class="empty">Loading memes…</div></div>
 </section>
@@ -214,7 +214,7 @@ details p{color:#5d635f;margin:10px 0 0}
   <details class="rv"><summary>What does “pair with any meme” mean?</summary><p>pump.fun's <span class="mono">create_v2</span> accepts a quote mint. With a pump.fun meme as the quote, your coin's bonding curve is priced in that meme, and every buy of your coin goes through it. pump.fun limits how deep these chains go and rejects memes that are not eligible; pumpex checks this live before you sign.</p></details>
   <details class="rv"><summary>Does pumpex hold any keys or funds?</summary><p>No. The transaction is built by pumpex's server from pump.fun's official SDK, signed by the coin's fresh mint key in your browser, then signed and sent by your own wallet. pumpex never sees a private key and never receives a fee.</p></details>
   <details class="rv"><summary>What does it cost?</summary><p>The pump.fun account rent for a new coin plus the Solana network fee, paid from your wallet. pumpex adds nothing.</p></details>
-  <details class="rv"><summary>Where is $PUMPEX in this?</summary><p>$PUMPEX is well #000, the launchpad's own coin. Its address appears here once it is live. Next on the engine: fees from wells buying $PUMPEX for holders.</p></details>
+  <details class="rv"><summary>Where is $PUMPEX in this?</summary><p>$PUMPEX is well #000, the launchpad's own coin. Next on the engine: fees from wells buying $PUMPEX for holders.</p></details>
   <details class="rv"><summary>Can I verify everything?</summary><p>Yes. Every launch links to its transaction on Solscan and its page on pump.fun. The creator of every pumpex coin is its holder-rewards PDA, which you can check on the coin's bonding curve account.</p></details>
  </div>
 </section>
@@ -274,7 +274,7 @@ async function search(v){const box=$('#memes');box.innerHTML='<div class="empty"
  try{const r=await fetch('https://api.dexscreener.com/latest/dex/search?q='+encodeURIComponent(v));const j=await r.json();const seen=new Set(),out=[];
  for(const p of (j.pairs||[])){if(p.chainId!=='solana')continue;const m=p.baseToken.address;if(!/pump$/.test(m)&&!/pump/.test(p.dexId||''))continue;if(seen.has(m))continue;seen.add(m);
  out.push({sym:p.baseToken.symbol,mint:m,img:(p.info&&p.info.imageUrl)||IMG(m),mcap:p.marketCap||p.fdv,ch:p.priceChange?p.priceChange.h24:null});if(out.length>=12)break}
- box.innerHTML='';if(!out.length){box.innerHTML='<div class="empty">No pump.fun coin found for that. Try a ticker or paste an address.</div>';return}out.forEach((t,i)=>box.appendChild(memeCard(t,i)));
+ box.innerHTML='';if(!out.length){box.innerHTML='<div class="empty">No pump.fun coin found for that. Try another name or ticker.</div>';return}out.forEach((t,i)=>box.appendChild(memeCard(t,i)));
  try{const j=await (await fetch('/api/pairs?mints='+out.map(t=>t.mint).join(','))).json();out.forEach(t=>{const v=j.pairs&&j.pairs[t.mint];t.ok=v?v.ok:null});if($('#q').value.trim()===v){box.innerHTML='';out.sort((x,y)=>(y.ok===true)-(x.ok===true)).forEach((t,i)=>box.appendChild(memeCard(t,i)))}}catch(e){}}
  catch(e){box.innerHTML='<div class="empty">Search is busy. Try again in a moment.</div>'}}
 async function pick(t){PAIR={mint:t.mint,sym:t.sym,img:t.img};document.querySelectorAll('.meme').forEach(e=>e.classList.remove('sel'));
@@ -302,20 +302,20 @@ $('#go').onclick=async()=>{if(!PK)return connect();const b=$('#go');b.disabled=t
  try{log('1/4 uploading image and metadata to pump.fun…');
   const m=await (await fetch('/api/ipfs',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({image:IMGDATA,name:$('#name').value,symbol:$('#ticker').value.toUpperCase(),description:$('#desc').value,twitter:$('#tw').value,telegram:$('#tg').value,website:$('#web').value})})).json();
   if(!m.uri)throw new Error(m.error||'metadata upload failed');log('✓ metadata '+m.uri.slice(0,46)+'…','ok');
-  const kp=solanaWeb3.Keypair.generate();log('2/4 building the pump.fun transaction (mint '+kp.publicKey.toBase58().slice(0,6)+'…)');
+  const kp=solanaWeb3.Keypair.generate();log('2/4 building the pump.fun transaction…');
   const r=await (await fetch('/api/launch',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({user:PK.toString(),mint:kp.publicKey.toBase58(),name:$('#name').value,symbol:$('#ticker').value.toUpperCase(),uri:m.uri,pair:PAIR.mint})})).json();
   if(!r.tx)throw new Error(r.error||'could not build the transaction');log('✓ create_v2 ready · creator = holder-rewards PDA '+r.creator.slice(0,6)+'…','ok');
   const tx=solanaWeb3.VersionedTransaction.deserialize(Uint8Array.from(atob(r.tx),c=>c.charCodeAt(0)));tx.sign([kp]);
   log('3/4 sign in your wallet…');const res=await W.signAndSendTransaction(tx);const sig=res.signature||res;
   log('4/4 sent · <a target="_blank" href="https://solscan.io/tx/'+sig+'">'+String(sig).slice(0,10)+'… on Solscan</a>','ok');
-  const mint=kp.publicKey.toBase58();log('✓ your well is live: <a target="_blank" href="https://pump.fun/coin/'+mint+'">pump.fun/coin/'+mint.slice(0,6)+'…</a>','ok');
+  const mint=kp.publicKey.toBase58();log('✓ your well is live: <a target="_blank" href="https://pump.fun/coin/'+mint+'">open it on pump.fun</a>','ok');
   const mine=JSON.parse(localStorage.getItem('pumpex.wells')||'[]');mine.unshift({mint,sym:$('#ticker').value.toUpperCase(),name:$('#name').value,sig,pair:PAIR.sym,at:Date.now()});try{localStorage.setItem('pumpex.wells',JSON.stringify(mine.slice(0,50)))}catch(e){}
   renderWells();toast('Well struck. $'+$('#ticker').value.toUpperCase()+' is live.')}
  catch(e){log('✕ '+(e.message||e),'er');toast('Launch did not go through')}finally{setGo()}};
 async function renderWells(){let mine=[];try{mine=JSON.parse(localStorage.getItem('pumpex.wells')||'[]')}catch(e){}const box=$('#mywells');if(!mine.length)return;
  const best=await dex(mine.map(w=>w.mint).slice(0,30));box.innerHTML='';
  mine.forEach(w=>{const p=best[w.mint];const d=document.createElement('div');d.className='well';
- d.innerHTML=`<img src="${IMG(w.mint)}" onerror="this.style.visibility='hidden'" alt=""><div><b>$${w.sym}</b> <small class="mono" style="color:var(--gray)">paired with ${w.pair==='SOL'?'SOL':'$'+w.pair}</small><br><small class="mono" style="color:var(--gray)">${w.mint.slice(0,6)}…${w.mint.slice(-4)} · ${p?'mcap $'+fmt(p.marketCap||p.fdv):'indexing…'}</small></div><a class="btn ghost sm x2" target="_blank" href="https://solscan.io/tx/${w.sig}">Solscan</a><a class="btn mint sm" target="_blank" href="https://pump.fun/coin/${w.mint}">pump.fun</a>`;box.appendChild(d)})}
+ d.innerHTML=`<img src="${IMG(w.mint)}" onerror="this.style.visibility='hidden'" alt=""><div><b>$${w.sym}</b> <small class="mono" style="color:var(--gray)">paired with ${w.pair==='SOL'?'SOL':'$'+w.pair}</small><br><small class="mono" style="color:var(--gray)">${p?'mcap $'+fmt(p.marketCap||p.fdv):'indexing…'}</small></div><a class="btn ghost sm x2" target="_blank" href="https://solscan.io/tx/${w.sig}">Solscan</a><a class="btn mint sm" target="_blank" href="https://pump.fun/coin/${w.mint}">pump.fun</a>`;box.appendChild(d)})}
 renderWells();upd();
 document.querySelectorAll('.step').forEach(d=>{d.classList.add('tilt');d.onmousemove=e=>{const r=d.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;d.style.transform=`perspective(900px) rotateX(${(-y*5).toFixed(2)}deg) rotateY(${(x*6).toFixed(2)}deg) translateY(-4px)`};d.onmouseleave=()=>{d.style.transform=''}});
 </script>
