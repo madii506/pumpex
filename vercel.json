@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "functions": {
+    "api/launch.js": { "maxDuration": 30 },
+    "api/ipfs.js": { "maxDuration": 30 },
+    "api/status.js": { "maxDuration": 20 }
+  },
+  "headers": [{ "source": "/(.*)", "headers": [{ "key": "X-Content-Type-Options", "value": "nosniff" }] }]
+}
