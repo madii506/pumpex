@@ -145,7 +145,7 @@ details p{color:#5d635f;margin:10px 0 0}
  <div>
   <div class="stage" id="stage">
    <div class="orbit" id="orbit"></div>
-   <div class="word"><svg id="wm" viewBox="0 0 1040 300" aria-label="pumpex"></svg></div>
+   <div class="word"><svg id="wm" viewBox="-6 0 1104 300" aria-label="pumpex"></svg></div>
   </div>
   <div class="tag">the pump.fun launchpad where every coin is an oil well.<br><span class="g">pair it with any meme. its fees are pumped to its holders.</span></div>
   <div class="cta"><a class="btn dark" href="#launch">Launch a well</a><a class="btn mint" href="#pair">Pair with a meme</a></div>
@@ -229,7 +229,7 @@ const toast=t=>{const e=$('#toast');e.textContent=t;e.classList.add('show');$('#
 const fmt=n=>n==null?'—':n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':(+n).toFixed(0);
 /* wordmark: pumpe + crossed pills */
 (function(){const s=$('#wm');if(!s)return;s.innerHTML='<text class="wmt" x="0" y="205" font-family="Archivo Black" font-size="250" fill="#0E0F0C">pumpe</text>'+
- [-38,38].map((a,j)=>`<g class="wmp ${j?'b':'a'}"><g><g transform="translate(905 140) rotate(${a})"><rect x="-27" y="-87" width="54" height="174" rx="27" fill="#fff" stroke="#0E0F0C" stroke-width="12"/><path d="M-21 ${j?-1:1}h42v${j?-58:58}a21 21 0 0 1 -42 0z" transform="${j?'scale(1,-1)':''}" fill="#2FD27A"/><rect x="-27" y="-87" width="54" height="174" rx="27" fill="none" stroke="#0E0F0C" stroke-width="12"/><line x1="-27" y1="0" x2="27" y2="0" stroke="#0E0F0C" stroke-width="8"/></g></g></g>`).join('');})();
+ [-38,38].map((a,j)=>`<g class="wmp ${j?'b':'a'}"><g><g transform="translate(1005 139) rotate(${a})"><rect x="-27" y="-87" width="54" height="174" rx="27" fill="#fff" stroke="#0E0F0C" stroke-width="12"/><path d="M-21 ${j?-1:1}h42v${j?-58:58}a21 21 0 0 1 -42 0z" transform="${j?'scale(1,-1)':''}" fill="#2FD27A"/><rect x="-27" y="-87" width="54" height="174" rx="27" fill="none" stroke="#0E0F0C" stroke-width="12"/><line x1="-27" y1="0" x2="27" y2="0" stroke="#0E0F0C" stroke-width="8"/></g></g></g>`).join('');})();
 /* orbit of real memecoins */
 (function(){const o=$('#orbit');const cs=MEMES.slice(0,8).map(([k,m],i)=>{const d=document.createElement('div');d.className='coin';d.style.backgroundImage=`url(${IMG(m)})`;d.title='$'+k;o.appendChild(d);return d});
  let t0=performance.now();function tick(now){const t=(now-t0)/1000,st=$('#stage').getBoundingClientRect(),rx=st.width*.46,ry=st.height*.40;
